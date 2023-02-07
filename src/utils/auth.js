@@ -8,13 +8,16 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const auth = (req, res, next) => {
     const { authorization } = req.headers;
     if (!authorization) {
-        throw new Error("Session expired");
+        return res.status(401).json({
+            ok: false,
+            message: 'Session Expired'
+        });
     }
     const [_, token] = authorization.split(" ");
     if (!token) {
         return res.status(401).json({
             ok: false,
-            message: 'No token provided'
+            message: 'No token provided', token
         });
     }
     try {

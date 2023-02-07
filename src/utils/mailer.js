@@ -21,8 +21,8 @@ exports.transporter = nodemailer_1.default.createTransport({
     port: 465,
     secure: true,
     auth: {
-        user: 'property.advice.mailer@gmail.com',
-        pass: 'bnxhddryrxljkniv',
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASSWORD,
     },
 });
 const verify = (transporter) => __awaiter(void 0, void 0, void 0, function* () {

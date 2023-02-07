@@ -8,14 +8,17 @@ export interface RequestWithUserId extends Request {
 export const auth = (req: RequestWithUserId, res: Response, next: NextFunction): any => {
   const {authorization}: any | undefined = req.headers
   if (!authorization){
-    throw new Error("Session expired");
+    return res.status(401).json({
+      ok: false,
+      message: 'Session Expired'
+    })
   }
   const [_,token] = authorization.split(" ");
 
   if (!token) {
     return res.status(401).json({
       ok: false,
-      message: 'No token provided'
+      message: 'No token provided', token
     })
   }
 
