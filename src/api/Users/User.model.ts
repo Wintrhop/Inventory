@@ -38,18 +38,16 @@ const userSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    project:{
-        type:{
-            projectName:{
-                type: String,
-                required:false
-            },
-            date:{
-                type: String,
-                required:false
-            }
-        },
-    }
+    project: {
+      projectName: {
+        type: String,
+        required: false,
+      },
+      date: {
+        type: String,
+        required: false,
+      },
+    },
   },
   { timestamps: true }
 );

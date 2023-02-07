@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.signIn = exports.register = exports.adminVerification = void 0;
+exports.update = exports.list = exports.signIn = exports.register = exports.adminVerification = void 0;
 const User_model_1 = __importDefault(require("./User.model"));
 const mailer_1 = require("../../utils/mailer");
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -101,3 +101,40 @@ function signIn(req, res, next) {
     });
 }
 exports.signIn = signIn;
+function list(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const userAuthId = (0, exports.adminVerification)(req.userId);
+            const users = yield User_model_1.default.find().select("-_id -password");
+            if (users.length === 0) {
+                throw new Error("Users empty");
+            }
+            res.status(201).json({ message: "Users found", data: users });
+        }
+        catch (err) {
+            res.status(404).json({ message: "Error", error: err.message });
+        }
+    });
+}
+exports.list = list;
+function update(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const userAuthId = (0, exports.adminVerification)(req.userId);
+            const { email } = req.params;
+            const data = req.body;
+            const user = yield User_model_1.default.findOne({ email }).select("-password");
+            if (!user) {
+                throw new Error("User not found");
+            }
+            const userUpdate = yield User_model_1.default.findByIdAndUpdate(user._id, data, { new: true });
+            res.status(200).json({ message: "User Updated", data: data });
+        }
+        catch (err) {
+            res
+                .status(400)
+                .json({ message: "User could not be Updated", error: err.message });
+        }
+    });
+}
+exports.update = update;

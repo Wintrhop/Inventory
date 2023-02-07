@@ -106,3 +106,43 @@ export async function signIn(
       .json({ message: "User could not login", error: err.message });
   }
 }
+
+export async function list(
+  req: RequestWithUserId,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userAuthId = adminVerification(req.userId as string);
+    
+    const users = await User.find().select("-_id -password");
+    if (users.length === 0) {
+      throw new Error("Users empty");
+    }
+    res.status(201).json({ message: "Users found", data: users });
+  } catch (err: any) {
+    res.status(404).json({ message: "Error", error: err.message });
+  }
+}
+
+export async function update(
+  req: RequestWithUserId,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userAuthId = adminVerification(req.userId as string);
+    const {email}=req.params;
+    const data: object = req.body;
+    const user: IUser | null = await User.findOne({email}).select("-password");
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const userUpdate = await User.findByIdAndUpdate(user._id, data, { new: true });
+    res.status(200).json({ message: "User Updated", data: data });
+  } catch (err: any) {
+    res
+      .status(400)
+      .json({ message: "User could not be Updated", error: err.message });
+  }
+}

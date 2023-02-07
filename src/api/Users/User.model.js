@@ -29,16 +29,14 @@ const userSchema = new mongoose_1.Schema({
         ref: "User",
     },
     project: {
-        type: {
-            projectName: {
-                type: String,
-                required: false
-            },
-            date: {
-                type: String,
-                required: false
-            }
+        projectName: {
+            type: String,
+            required: false,
         },
-    }
+        date: {
+            type: String,
+            required: false,
+        },
+    },
 }, { timestamps: true });
 exports.default = (0, mongoose_1.model)("User", userSchema);
