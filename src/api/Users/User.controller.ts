@@ -133,12 +133,17 @@ export async function update(
   try {
     const userAuthId = adminVerification(req.userId as string);
     const {email}=req.params;
-    const data: object = req.body;
+    const data: IUser|null = req.body;
     const user: IUser | null = await User.findOne({email}).select("-password");
     if (!user) {
       throw new Error("User not found");
     }
-    const userUpdate = await User.findByIdAndUpdate(user._id, data, { new: true });
+    if(!data){
+      throw new Error ("No data to Update");
+    }
+    console.log(data.role);
+    const opts = { runValidators: true };
+    const userUpdate = await User.findByIdAndUpdate(user._id, data, opts);
     res.status(200).json({ message: "User Updated", data: data });
   } catch (err: any) {
     res

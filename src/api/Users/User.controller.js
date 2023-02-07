@@ -127,7 +127,12 @@ function update(req, res, next) {
             if (!user) {
                 throw new Error("User not found");
             }
-            const userUpdate = yield User_model_1.default.findByIdAndUpdate(user._id, data, { new: true });
+            if (!data) {
+                throw new Error("No data to Update");
+            }
+            console.log(data.role);
+            const opts = { runValidators: true };
+            const userUpdate = yield User_model_1.default.findByIdAndUpdate(user._id, data, opts);
             res.status(200).json({ message: "User Updated", data: data });
         }
         catch (err) {
