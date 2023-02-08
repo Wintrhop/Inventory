@@ -130,7 +130,7 @@ function update(req, res, next) {
             if (!data) {
                 throw new Error("No data to Update");
             }
-            console.log(data.role);
+            console.log(data.role); //TO DO: no guarda copia del objeto project
             const opts = { runValidators: true };
             const userUpdate = yield User_model_1.default.findByIdAndUpdate(user._id, data, opts);
             res.status(200).json({ message: "User Updated", data: data });
