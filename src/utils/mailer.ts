@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { IUser } from "../api/Users/User.model";
 const mail = process.env.MAIL_USER as string;
 const password = process.env.MAIL_PASSWORD as string;
 
@@ -20,7 +21,7 @@ export const verify = async (transporter: any) => {
   }
 };
 const styles = {
-  box:`display:flex;
+  box: `display:flex;
   justify-content: center;`,
   container: `width:30%;
   padding:15px;
@@ -31,7 +32,7 @@ const styles = {
   `,
 };
 
-export const welcome = (user: any, password:string) => {
+export const welcome = (user: any, password: string) => {
   return {
     from: `"${process.env.MAIL_USERNAME}"<${process.env.MAIL_USER}>`,
     to: user.email,
@@ -48,5 +49,24 @@ export const welcome = (user: any, password:string) => {
         
       `,
     text: `Bienvenido ${user.name}`,
+  };
+};
+
+export const projectCreated = (user: any, name: string, startDate: string) => {
+  return {
+    from: `"${process.env.MAIL_USERNAME}"<${process.env.MAIL_USER}>`,
+    to: `${user.email}, ${process.env.ADM_MAIL}`,
+    subject: `Creacion de Projecto ${name}`,
+    html: `
+    <div style="${styles.box}">
+      <div style="${styles.container}">
+          <h1>Creacion de Projecto ${name}</h1>
+          <p> ${user.email} ha creado un nuevo projecto. </p>
+          <p> con fecha de inicio: ${startDate}</p>
+        </div>
+        </div>
+        
+      `,
+    text: `Creacion de Projecto ${name}`,
   };
 };

@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import userRoute from "./api/Users/User.routes"
+import projectRoute from "./api/Projects/Projects.routes"
 
 
 const app = express();
@@ -12,5 +13,6 @@ app.use(morgan("tiny"));
 app.use(express.json());
 
 app.use("/auth/local",userRoute);
+app.use("/api/projects",projectRoute);
 
 export default app;

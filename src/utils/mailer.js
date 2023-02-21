@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.welcome = exports.verify = exports.transporter = void 0;
+exports.projectCreated = exports.welcome = exports.verify = exports.transporter = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const mail = process.env.MAIL_USER;
 const password = process.env.MAIL_PASSWORD;
@@ -63,3 +63,22 @@ const welcome = (user, password) => {
     };
 };
 exports.welcome = welcome;
+const projectCreated = (user, name, startDate) => {
+    return {
+        from: `"${process.env.MAIL_USERNAME}"<${process.env.MAIL_USER}>`,
+        to: `${user.email}, ${process.env.ADM_MAIL}`,
+        subject: `Creacion de Projecto ${name}`,
+        html: `
+    <div style="${styles.box}">
+      <div style="${styles.container}">
+          <h1>Creacion de Projecto ${name}</h1>
+          <p> ${user.email} ha creado un nuevo projecto. </p>
+          <p> con fecha de inicio: ${startDate}</p>
+        </div>
+        </div>
+        
+      `,
+        text: `Creacion de Projecto ${name}`,
+    };
+};
+exports.projectCreated = projectCreated;
