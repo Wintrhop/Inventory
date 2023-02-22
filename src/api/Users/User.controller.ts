@@ -19,6 +19,14 @@ export const adminVerification = async (userId: string) => {
   return userAuth;
 };
 
+export const userFinder = async(userId:string)=>{
+  const userAuth= await User.findById(userId);
+  if(!userAuth){
+    throw new Error("Wrong Credentials");
+  }
+  return userAuth;
+}
+
 export async function register(
   req: RequestWithUserId,
   res: Response,
@@ -27,7 +35,7 @@ export async function register(
   try {
     const userAuthId = adminVerification(req.userId as string);
 
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role,org } = req.body;
     if (role === "admin") {
       throw new Error("Role Admin Cannot be Created");
     }
@@ -45,6 +53,7 @@ export async function register(
       name,
       email,
       password: encPassword,
+      org,
       role,
     };
     const user: IUser = await User.create(newUser);
@@ -95,10 +104,11 @@ export async function signIn(
 
     const role = user.role;
     const name = user.name;
+    const org = user.org;
     
     res.status(201).json({
       message: "User Login Successfully",
-      data: { name, email, role, token  },
+      data: { name, email, role, token, org  },
     });
   } catch (err: any) {
     res

@@ -1,14 +1,15 @@
 import { model, Schema, Document } from "mongoose";
+import { IProject } from "../Projects/Projects.model";
 
 const emailRegex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
 export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  org?: string;
+  org: string;
   role: string;
   createdBy?: IUser["_id"];
-  project?: { projectName: string; date: string };
+  project?: IProject["_id"];
 }
 
 const userSchema = new Schema(
@@ -25,6 +26,7 @@ const userSchema = new Schema(
     },
     org: {
       type: String,
+      required:[true, "Please enter an Org"],
     },
     role: {
       type: String,
@@ -39,14 +41,8 @@ const userSchema = new Schema(
       ref: "User",
     },
     project: {
-      projectName: {
-        type: String,
-        required: false,
-      },
-      date: {
-        type: String,
-        required: false,
-      },
+      type:Schema.Types.ObjectId,
+      ref:"Project"
     },
   },
   { timestamps: true }

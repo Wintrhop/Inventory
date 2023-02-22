@@ -15,6 +15,7 @@ const userSchema = new mongoose_1.Schema({
     },
     org: {
         type: String,
+        required: [true, "Please enter an Org"],
     },
     role: {
         type: String,
@@ -29,14 +30,8 @@ const userSchema = new mongoose_1.Schema({
         ref: "User",
     },
     project: {
-        projectName: {
-            type: String,
-            required: false,
-        },
-        date: {
-            type: String,
-            required: false,
-        },
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Project"
     },
 }, { timestamps: true });
 exports.default = (0, mongoose_1.model)("User", userSchema);

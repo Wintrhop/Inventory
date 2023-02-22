@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.update = exports.list = exports.signIn = exports.register = exports.adminVerification = void 0;
+exports.update = exports.list = exports.signIn = exports.register = exports.userFinder = exports.adminVerification = void 0;
 const User_model_1 = __importDefault(require("./User.model"));
 const mailer_1 = require("../../utils/mailer");
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -29,11 +29,19 @@ const adminVerification = (userId) => __awaiter(void 0, void 0, void 0, function
     return userAuth;
 });
 exports.adminVerification = adminVerification;
+const userFinder = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const userAuth = yield User_model_1.default.findById(userId);
+    if (!userAuth) {
+        throw new Error("Wrong Credentials");
+    }
+    return userAuth;
+});
+exports.userFinder = userFinder;
 function register(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const userAuthId = (0, exports.adminVerification)(req.userId);
-            const { name, email, password, role } = req.body;
+            const { name, email, password, role, org } = req.body;
             if (role === "admin") {
                 throw new Error("Role Admin Cannot be Created");
             }
@@ -50,6 +58,7 @@ function register(req, res, next) {
                 name,
                 email,
                 password: encPassword,
+                org,
                 role,
             };
             const user = yield User_model_1.default.create(newUser);
@@ -88,9 +97,10 @@ function signIn(req, res, next) {
             });
             const role = user.role;
             const name = user.name;
+            const org = user.org;
             res.status(201).json({
                 message: "User Login Successfully",
-                data: { name, email, role, token },
+                data: { name, email, role, token, org },
             });
         }
         catch (err) {

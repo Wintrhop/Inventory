@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import User, { IUser } from "../Users/User.model";
 import { transporter, projectCreated } from "../../utils/mailer";
 import { RequestWithUserId } from "../../utils/auth";
-import { adminVerification } from "../Users/User.controller";
+import { adminVerification, userFinder } from "../Users/User.controller";
 import Project, { IProject } from "./Projects.model";
 
 export async function create(
@@ -18,12 +18,105 @@ export async function create(
       startDate,
     };
     const project: IProject = await Project.create(newProject);
-    await transporter.sendMail(projectCreated(userAuthId,name,startDate));
+    await transporter.sendMail(projectCreated(userAuthId, name, startDate));
     res.status(201).json({
-        message:"Project created successfully",
-        data:{name,startDate},
+      message: "Project created successfully",
+      data: { name, startDate },
     });
-  } catch (err:any) {
-    res.status(400).json({message:"Project could not be created", error:err.message});
+  } catch (err: any) {
+    res
+      .status(400)
+      .json({ message: "Project could not be created", error: err.message });
+  }
+}
+export async function update(
+  req: RequestWithUserId,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userAuthId = await adminVerification(req.userId as string);
+    const { projectId } = req.params;
+    const { users, endDate } = req.body;
+    const project = await Project.findById(projectId);
+    if (!project) {
+      throw new Error("Invalid project");
+    }
+    if (!!endDate) {
+      if (project.endDate !== undefined) {
+        throw new Error("project already ended");
+      }
+      project.endDate = endDate;
+    }
+    if (users.length > 0) {
+      const newUsers = new Array();
+      for (let i = 0; i < users.length; i++) {
+        const element = await User.findOne({ email: users[i] });
+        newUsers.push(element?._id);
+        if (!element) {
+          throw new Error("User not Found");
+        }
+        element.project = project._id;
+        await element.save({ validateBeforeSave: false });
+      }
+      if (project.users.length === 0) {
+        project.users = [...newUsers];
+      } else {
+        const prevUsers = project.users;
+        const allUsers = [...prevUsers, ...newUsers];
+        project.users = allUsers;
+      }
+    }
+    await project.save({ validateBeforeSave: false });
+    res.status(201).json({ message: "Project updated", data: project._id });
+  } catch (err: any) {
+    res.status(400).json({
+      message: "Project could not be updated",
+      error: err.message,
+    });
+  }
+}
+
+export async function list(
+  req: RequestWithUserId,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userAuthId = await adminVerification(req.userId as string);
+    const projects = await Project.find().select("-users");
+    if (projects.length === 0) {
+      throw new Error("Projects empty");
+    }
+    res.status(201).json({ message: "Projects found", data: projects });
+  } catch (err: any) {
+    res.status(404).json({ message: "Error", error: err.message });
+  }
+}
+export async function show(
+  req: RequestWithUserId,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userAuthId = await userFinder(req.userId as string);
+    const { projectId } = req.params;
+    const project = await Project.findById(projectId);
+
+    if (!project?._id) {
+      throw new Error("Project not found");
+    }
+    if (userAuthId.role === "projectWorker" || userAuthId.role === "client") {
+      if (!project.users.includes(userAuthId._id)) {
+        throw new Error("Invalid user");
+      }
+    }
+    const projectShow = await Project.findById(projectId).populate({
+      path: "users",
+      select: "-_id -password",
+    });
+    res.status(201).json({ message: "Project found", data: projectShow });
+  } catch (err: any) {
+    res.status(400).json({ message: "error", error: err.message });
   }
 }
