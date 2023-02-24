@@ -5,7 +5,7 @@ import * as swaggerUi from 'swagger-ui-express';
 const routesApi = path.join(__dirname,"./api/**/*.routes")
 const options:swaggerJSDoc.OAS3Options={
     definition: {
-        openapi: '1.0.0',
+        openapi: '3.0.0',
         info: {
             title: 'Inventory Rcm',
             description: 'Iventory management',

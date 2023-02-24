@@ -27,11 +27,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.swaggerDoc = void 0;
+const path_1 = __importDefault(require("path"));
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const swaggerUi = __importStar(require("swagger-ui-express"));
+const routesApi = path_1.default.join(__dirname, "./api/**/*.routes");
 const options = {
     definition: {
-        openapi: '1.0.0',
+        openapi: '3.0.0',
         info: {
             title: 'Inventory Rcm',
             description: 'Iventory management',
@@ -46,13 +48,30 @@ const options = {
                 User: {
                     type: 'object',
                     properties: {
-                        id: {
-                            type: 'integer',
-                            format: 'int64',
+                        _id: {
+                            type: String,
+                            
                         },
-                        username: {
-                            type: 'string',
+                        name: {
+                            type: String,
                         },
+                        email:{
+                            type:String,
+                        },
+                        password:{
+                            type:String,
+
+                        },
+                        org:{
+                            type:String,
+                        },
+                        role:{
+                            type:String
+                        },
+                        createdBy:{
+                            type: 
+                        },
+
                     },
                 },
             },
@@ -68,7 +87,7 @@ const options = {
             description: 'API external documentation',
         },
     },
-    apis: ['./example/routes*.js', './example/parameters.yaml'],
+    apis: [routesApi],
 };
 const swaggerSpec = (0, swagger_jsdoc_1.default)(options);
 function swaggerDoc(app) {
