@@ -5,6 +5,13 @@ import { RequestWithUserId } from "../../utils/auth";
 import { adminVerification, userFinder } from "../Users/User.controller";
 import Project, { IProject } from "./Projects.model";
 
+export async function projectExist(projectId: string) {
+  const project = await Project.findById(projectId);
+  if (!project) {
+    throw new Error("Project not Found");
+  }
+  return project;
+}
 export async function create(
   req: RequestWithUserId,
   res: Response,
@@ -42,10 +49,8 @@ export async function update(
     const { projectId } = req.params;
     const { users, endDate } = req.body;
     const usersError = new Array();
-    const project = await Project.findById(projectId);
-    if (!project) {
-      throw new Error("Invalid project");
-    }
+    const project = await projectExist(projectId as string);
+    
     if (!!endDate) {
       if (project.endDate !== undefined) {
         throw new Error("project already ended");
@@ -122,7 +127,7 @@ export async function show(
   try {
     const userAuthId = await userFinder(req.userId as string);
     const { projectId } = req.params;
-    const project = await Project.findById(projectId);
+    const project = await projectExist(projectId as string);
 
     if (!project?._id) {
       throw new Error("Project not found");

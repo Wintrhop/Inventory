@@ -12,11 +12,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.show = exports.list = exports.update = exports.create = void 0;
+exports.show = exports.list = exports.update = exports.create = exports.projectExist = void 0;
 const User_model_1 = __importDefault(require("../Users/User.model"));
 const mailer_1 = require("../../utils/mailer");
 const User_controller_1 = require("../Users/User.controller");
 const Projects_model_1 = __importDefault(require("./Projects.model"));
+function projectExist(projectId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const project = yield Projects_model_1.default.findById(projectId);
+        if (!project) {
+            throw new Error("Project not Found");
+        }
+        return project;
+    });
+}
+exports.projectExist = projectExist;
 function create(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -48,10 +58,7 @@ function update(req, res, next) {
             const { projectId } = req.params;
             const { users, endDate } = req.body;
             const usersError = new Array();
-            const project = yield Projects_model_1.default.findById(projectId);
-            if (!project) {
-                throw new Error("Invalid project");
-            }
+            const project = yield projectExist(projectId);
             if (!!endDate) {
                 if (project.endDate !== undefined) {
                     throw new Error("project already ended");
@@ -126,7 +133,7 @@ function show(req, res, next) {
         try {
             const userAuthId = yield (0, User_controller_1.userFinder)(req.userId);
             const { projectId } = req.params;
-            const project = yield Projects_model_1.default.findById(projectId);
+            const project = yield projectExist(projectId);
             if (!(project === null || project === void 0 ? void 0 : project._id)) {
                 throw new Error("Project not found");
             }
