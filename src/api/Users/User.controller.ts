@@ -8,14 +8,20 @@ import jwt from "jsonwebtoken";
 const passwordRegex = new RegExp(
   "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
 );
-export const adminVerification = async (userId: string) => {
+export const adminVerification = async (userId: string, caseVerification: string ) => {
   const userAuth = await User.findById(userId);
   if (!userAuth) {
     throw new Error("Wrong Credentials");
   }
+  if(caseVerification=== "admin"){
   if (userAuth.role !== "admin") {
     throw new Error("Wrong Role Credentials");
+  }} else if(caseVerification === "adminAndSupport"){
+    if (userAuth.role === "projectWorker" || userAuth.role === "client") {
+        throw new Error("Wrong Role Credentials");
+    }
   }
+
   return userAuth;
 };
 
@@ -33,7 +39,7 @@ export async function register(
   next: NextFunction
 ): Promise<void> {
   try {
-    const userAuthId = adminVerification(req.userId as string);
+    const userAuthId = await adminVerification(req.userId as string, "adminAndSupport");
 
     const { name, email, password, role,org } = req.body;
     if (role === "admin") {
@@ -123,7 +129,7 @@ export async function list(
   next: NextFunction
 ): Promise<void> {
   try {
-    const userAuthId = adminVerification(req.userId as string);
+    const userAuthId = await adminVerification(req.userId as string,"adminAndSupport");
     
     const users = await User.find().select("-_id -password");
     if (users.length === 0) {
@@ -141,7 +147,7 @@ export async function update(
   next: NextFunction
 ): Promise<void> {
   try {
-    const userAuthId = adminVerification(req.userId as string);
+    const userAuthId = await adminVerification(req.userId as string, "adminAndSupport");
     const {email}=req.params;
     const data: IUser|null = req.body;
     const user: IUser | null = await User.findOne({email}).select("-password");

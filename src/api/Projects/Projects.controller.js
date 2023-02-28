@@ -20,7 +20,7 @@ const Projects_model_1 = __importDefault(require("./Projects.model"));
 function create(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const userAuthId = yield (0, User_controller_1.adminVerification)(req.userId);
+            const userAuthId = yield (0, User_controller_1.adminVerification)(req.userId, "adminAndSupport");
             const { name, startDate } = req.body;
             const newProject = {
                 name,
@@ -44,9 +44,10 @@ exports.create = create;
 function update(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const userAuthId = yield (0, User_controller_1.adminVerification)(req.userId);
+            const userAuthId = yield (0, User_controller_1.adminVerification)(req.userId, "admin");
             const { projectId } = req.params;
             const { users, endDate } = req.body;
+            const usersError = new Array();
             const project = yield Projects_model_1.default.findById(projectId);
             if (!project) {
                 throw new Error("Invalid project");
@@ -61,10 +62,14 @@ function update(req, res, next) {
                 const newUsers = new Array();
                 for (let i = 0; i < users.length; i++) {
                     const element = yield User_model_1.default.findOne({ email: users[i] });
-                    newUsers.push(element === null || element === void 0 ? void 0 : element._id);
                     if (!element) {
                         throw new Error("User not Found");
                     }
+                    if (project.users.includes(element === null || element === void 0 ? void 0 : element._id)) {
+                        usersError.push(element.email);
+                        continue;
+                    }
+                    newUsers.push(element === null || element === void 0 ? void 0 : element._id);
                     element.project = project._id;
                     yield element.save({ validateBeforeSave: false });
                 }
@@ -78,7 +83,15 @@ function update(req, res, next) {
                 }
             }
             yield project.save({ validateBeforeSave: false });
-            res.status(201).json({ message: "Project updated", data: project._id });
+            if (usersError.length === users.length) {
+                throw new Error("Users already in project");
+            }
+            if (!!usersError[0]) {
+                res.status(201).json({ message: "Project updated but some users cannot aggregate", data: { "Error": usersError, "Project": project._id } });
+            }
+            else {
+                res.status(201).json({ message: "Project updated", data: project._id });
+            }
         }
         catch (err) {
             res.status(400).json({
@@ -92,8 +105,8 @@ exports.update = update;
 function list(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const userAuthId = yield (0, User_controller_1.adminVerification)(req.userId);
-            const projects = yield Projects_model_1.default.find().select("-users");
+            const userAuthId = yield (0, User_controller_1.adminVerification)(req.userId, "adminAndSupport");
+            const projects = yield Projects_model_1.default.find(); //.select("-users");
             if (projects.length === 0) {
                 throw new Error("Projects empty");
             }

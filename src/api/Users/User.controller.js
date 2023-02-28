@@ -18,13 +18,20 @@ const mailer_1 = require("../../utils/mailer");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const passwordRegex = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$");
-const adminVerification = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+const adminVerification = (userId, caseVerification) => __awaiter(void 0, void 0, void 0, function* () {
     const userAuth = yield User_model_1.default.findById(userId);
     if (!userAuth) {
         throw new Error("Wrong Credentials");
     }
-    if (userAuth.role !== "admin") {
-        throw new Error("Wrong Role Credentials");
+    if (caseVerification === "admin") {
+        if (userAuth.role !== "admin") {
+            throw new Error("Wrong Role Credentials");
+        }
+    }
+    else if (caseVerification === "adminAndSupport") {
+        if (userAuth.role === "projectWorker" || userAuth.role === "client") {
+            throw new Error("Wrong Role Credentials");
+        }
     }
     return userAuth;
 });
@@ -40,7 +47,7 @@ exports.userFinder = userFinder;
 function register(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const userAuthId = (0, exports.adminVerification)(req.userId);
+            const userAuthId = yield (0, exports.adminVerification)(req.userId, "adminAndSupport");
             const { name, email, password, role, org } = req.body;
             if (role === "admin") {
                 throw new Error("Role Admin Cannot be Created");
@@ -114,7 +121,7 @@ exports.signIn = signIn;
 function list(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const userAuthId = (0, exports.adminVerification)(req.userId);
+            const userAuthId = yield (0, exports.adminVerification)(req.userId, "adminAndSupport");
             const users = yield User_model_1.default.find().select("-_id -password");
             if (users.length === 0) {
                 throw new Error("Users empty");
@@ -130,7 +137,7 @@ exports.list = list;
 function update(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const userAuthId = (0, exports.adminVerification)(req.userId);
+            const userAuthId = yield (0, exports.adminVerification)(req.userId, "adminAndSupport");
             const { email } = req.params;
             const data = req.body;
             const user = yield User_model_1.default.findOne({ email }).select("-password");

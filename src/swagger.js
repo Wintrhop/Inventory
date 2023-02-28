@@ -48,30 +48,13 @@ const options = {
                 User: {
                     type: 'object',
                     properties: {
-                        _id: {
-                            type: String,
-                            
+                        id: {
+                            type: 'integer',
+                            format: 'int64',
                         },
-                        name: {
-                            type: String,
+                        username: {
+                            type: 'string',
                         },
-                        email:{
-                            type:String,
-                        },
-                        password:{
-                            type:String,
-
-                        },
-                        org:{
-                            type:String,
-                        },
-                        role:{
-                            type:String
-                        },
-                        createdBy:{
-                            type: 
-                        },
-
                     },
                 },
             },

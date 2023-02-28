@@ -11,7 +11,10 @@ export async function create(
   next: NextFunction
 ): Promise<void> {
   try {
-    const userAuthId = await adminVerification(req.userId as string);
+    const userAuthId = await adminVerification(
+      req.userId as string,
+      "adminAndSupport"
+    );
     const { name, startDate } = req.body;
     const newProject = {
       name,
@@ -35,9 +38,10 @@ export async function update(
   next: NextFunction
 ): Promise<void> {
   try {
-    const userAuthId = await adminVerification(req.userId as string);
+    const userAuthId = await adminVerification(req.userId as string, "admin");
     const { projectId } = req.params;
     const { users, endDate } = req.body;
+    const usersError = new Array();
     const project = await Project.findById(projectId);
     if (!project) {
       throw new Error("Invalid project");
@@ -49,13 +53,18 @@ export async function update(
       project.endDate = endDate;
     }
     if (users.length > 0) {
+      
       const newUsers = new Array();
       for (let i = 0; i < users.length; i++) {
         const element = await User.findOne({ email: users[i] });
-        newUsers.push(element?._id);
         if (!element) {
           throw new Error("User not Found");
         }
+        if (project.users.includes(element?._id)) {
+          usersError.push(element.email);
+          continue;
+        }
+        newUsers.push(element?._id);
         element.project = project._id;
         await element.save({ validateBeforeSave: false });
       }
@@ -68,7 +77,14 @@ export async function update(
       }
     }
     await project.save({ validateBeforeSave: false });
-    res.status(201).json({ message: "Project updated", data: project._id });
+    if(usersError.length === users.length){
+      throw new Error("Users already in project");
+      
+    }
+    if(!!usersError[0]){
+      res.status(201).json({ message: "Project updated but some users cannot aggregate", data: {"Error":usersError, "Project":project._id} });
+    } else{
+    res.status(201).json({ message: "Project updated", data: project._id });}
   } catch (err: any) {
     res.status(400).json({
       message: "Project could not be updated",
@@ -83,8 +99,11 @@ export async function list(
   next: NextFunction
 ): Promise<void> {
   try {
-    const userAuthId = await adminVerification(req.userId as string);
-    const projects = await Project.find().select("-users");
+    const userAuthId = await adminVerification(
+      req.userId as string,
+      "adminAndSupport"
+    );
+    const projects = await Project.find(); //.select("-users");
     if (projects.length === 0) {
       throw new Error("Projects empty");
     }
