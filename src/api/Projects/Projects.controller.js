@@ -87,7 +87,10 @@ function update(req, res, next) {
                 throw new Error("Users already in project");
             }
             if (!!usersError[0]) {
-                res.status(201).json({ message: "Project updated but some users cannot aggregate", data: { "Error": usersError, "Project": project._id } });
+                res.status(201).json({
+                    message: "Project updated but some users cannot aggregate",
+                    data: { Error: usersError, Project: project._id },
+                });
             }
             else {
                 res.status(201).json({ message: "Project updated", data: project._id });

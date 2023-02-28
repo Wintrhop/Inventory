@@ -53,7 +53,6 @@ export async function update(
       project.endDate = endDate;
     }
     if (users.length > 0) {
-      
       const newUsers = new Array();
       for (let i = 0; i < users.length; i++) {
         const element = await User.findOne({ email: users[i] });
@@ -77,14 +76,17 @@ export async function update(
       }
     }
     await project.save({ validateBeforeSave: false });
-    if(usersError.length === users.length){
+    if (usersError.length === users.length) {
       throw new Error("Users already in project");
-      
     }
-    if(!!usersError[0]){
-      res.status(201).json({ message: "Project updated but some users cannot aggregate", data: {"Error":usersError, "Project":project._id} });
-    } else{
-    res.status(201).json({ message: "Project updated", data: project._id });}
+    if (!!usersError[0]) {
+      res.status(201).json({
+        message: "Project updated but some users cannot aggregate",
+        data: { Error: usersError, Project: project._id },
+      });
+    } else {
+      res.status(201).json({ message: "Project updated", data: project._id });
+    }
   } catch (err: any) {
     res.status(400).json({
       message: "Project could not be updated",
