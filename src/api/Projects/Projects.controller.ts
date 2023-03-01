@@ -12,6 +12,9 @@ export async function projectExist(projectId: string) {
   }
   return project;
 }
+export function userAllowed(userProject:string, projectId: string) {
+  if(userProject !== projectId) throw new Error("Invalid user");
+}
 export async function create(
   req: RequestWithUserId,
   res: Response,

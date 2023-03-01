@@ -1,4 +1,5 @@
 import { model, Schema, Document } from "mongoose";
+import { IFile } from "../Files/Files.model";
 import { IProject } from "../Projects/Projects.model";
 
 const emailRegex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
@@ -10,6 +11,7 @@ export interface IUser extends Document {
   role: string;
   createdBy?: IUser["_id"];
   project?: IProject["_id"];
+  files?: IFile["_id"];
 }
 
 const userSchema = new Schema(
@@ -44,6 +46,10 @@ const userSchema = new Schema(
       type:Schema.Types.ObjectId,
       ref:"Project"
     },
+    files: {
+      type: [{ type: Schema.Types.ObjectId, ref: "File" }],
+      required: false,
+    }
   },
   { timestamps: true }
 );

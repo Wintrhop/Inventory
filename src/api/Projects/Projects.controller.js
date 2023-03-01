@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.show = exports.list = exports.update = exports.create = exports.projectExist = void 0;
+exports.show = exports.list = exports.update = exports.create = exports.userAllowed = exports.projectExist = void 0;
 const User_model_1 = __importDefault(require("../Users/User.model"));
 const mailer_1 = require("../../utils/mailer");
 const User_controller_1 = require("../Users/User.controller");
@@ -27,6 +27,11 @@ function projectExist(projectId) {
     });
 }
 exports.projectExist = projectExist;
+function userAllowed(userProject, projectId) {
+    if (userProject !== projectId)
+        throw new Error("Invalid user");
+}
+exports.userAllowed = userAllowed;
 function create(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
