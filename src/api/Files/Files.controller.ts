@@ -37,8 +37,20 @@ export async function create(
     res.status(201).json({ message: "File Created", data: data });
   } catch (err: any) {
     res.status(400).json({
-      message: "Advice could not be created",
+      message: "File could not be created",
       error: err.message,
     });
   }
+}
+
+export async function list(
+  req: RequestWithUserId,
+  res: Response,
+  next: NextFunction
+):Promise<void> {
+    try {
+        
+    } catch (error) {
+        
+    }
 }

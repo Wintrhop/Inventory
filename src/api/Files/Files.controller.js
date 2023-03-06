@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.create = void 0;
+exports.list = exports.create = void 0;
 const User_controller_1 = require("../Users/User.controller");
 const Files_model_1 = __importDefault(require("../Files/Files.model"));
 const Projects_controller_1 = require("../Projects/Projects.controller");
@@ -39,10 +39,19 @@ function create(req, res, next) {
         }
         catch (err) {
             res.status(400).json({
-                message: "Advice could not be created",
+                message: "File could not be created",
                 error: err.message,
             });
         }
     });
 }
 exports.create = create;
+function list(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+        }
+        catch (error) {
+        }
+    });
+}
+exports.list = list;
