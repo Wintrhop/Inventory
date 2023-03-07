@@ -36,7 +36,7 @@ export const s3upload = (req: Request, res: Response, next: NextFunction) => {
     if (reqFile === undefined) throw new Error("file undefined");
     if (reqFile.location === undefined) throw new Error("location undefined");
 
-    console.log("body en s3upload");
+    
 
     req.body = {
       ...data,

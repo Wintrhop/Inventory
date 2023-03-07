@@ -18,8 +18,6 @@ export async function create(
     const data = req.body;
     const project = await projectExist(projectId as string);
     
-    console.log(data, " req body en files controller linea 21");
-
     if (userAuthId.role === "client") {
       throw new Error("Clients not allowed to create files");
     }

@@ -37,7 +37,6 @@ const s3upload = (req, res, next) => {
             throw new Error("file undefined");
         if (reqFile.location === undefined)
             throw new Error("location undefined");
-        console.log("body en s3upload");
         req.body = Object.assign(Object.assign({}, data), { file: reqFile.location });
         next();
     });

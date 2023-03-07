@@ -23,7 +23,6 @@ function create(req, res, next) {
             const { projectId } = req.params;
             const data = req.body;
             const project = yield (0, Projects_controller_1.projectExist)(projectId);
-            console.log(data, " req body en files controller linea 21");
             if (userAuthId.role === "client") {
                 throw new Error("Clients not allowed to create files");
             }
