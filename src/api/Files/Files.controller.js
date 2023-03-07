@@ -23,6 +23,7 @@ function create(req, res, next) {
             const { projectId } = req.params;
             const data = req.body;
             const project = yield (0, Projects_controller_1.projectExist)(projectId);
+            console.log('hola linea 21 en file controller');
             if (userAuthId.role === "client") {
                 throw new Error("Clients not allowed to create files");
             }
@@ -50,8 +51,7 @@ function list(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
         }
-        catch (error) {
-        }
+        catch (error) { }
     });
 }
 exports.list = list;

@@ -18,6 +18,7 @@ export async function create(
     const data = req.body;
     const project = await projectExist(projectId as string);
 
+    console.log('hola linea 21 en file controller')
     if (userAuthId.role === "client") {
       throw new Error("Clients not allowed to create files");
     }
@@ -47,10 +48,7 @@ export async function list(
   req: RequestWithUserId,
   res: Response,
   next: NextFunction
-):Promise<void> {
-    try {
-        
-    } catch (error) {
-        
-    }
+): Promise<void> {
+  try {
+  } catch (error) {}
 }

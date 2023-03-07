@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client } from "@aws-sdk/client-s3";
 import { Request, Response, NextFunction } from "express";
 import multer from "multer";
 import s3Storage from "multer-s3";
@@ -28,5 +28,7 @@ const upload = (bucketName:string) =>
 
 export const s3upload = (req: Request, res: Response, next: NextFunction) => {
   
-   const uploadSingle= upload(process.env.S3_BUCKETNAME as string).single('csv')
+    const uploadSingle= upload(process.env.S3_BUCKETNAME as string).single('file')
+    
+    next();
 };

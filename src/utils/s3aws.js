@@ -28,6 +28,7 @@ const upload = (bucketName) => (0, multer_1.default)({
     }),
 });
 const s3upload = (req, res, next) => {
-    const uploadSingle = upload(process.env.S3_BUCKETNAME).single('csv');
+    const uploadSingle = upload(process.env.S3_BUCKETNAME).single('file');
+    next();
 };
 exports.s3upload = s3upload;
