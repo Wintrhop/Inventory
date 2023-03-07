@@ -23,11 +23,12 @@ function create(req, res, next) {
             const { projectId } = req.params;
             const data = req.body;
             const project = yield (0, Projects_controller_1.projectExist)(projectId);
-            console.log('hola linea 21 en file controller');
+            console.log(data, " req body en files controller linea 21");
             if (userAuthId.role === "client") {
                 throw new Error("Clients not allowed to create files");
             }
-            if (userAuthId.role !== "admin" || "support") {
+            if (userAuthId.role !== "admin" && "support") {
+                console.log(userAuthId.role + ' linea 26 de files controller');
                 (0, Projects_controller_1.userAllowed)(userAuthId.project, projectId);
             }
             const newFile = Object.assign(Object.assign({}, data), { user: userAuthId._id, project: project._id });
