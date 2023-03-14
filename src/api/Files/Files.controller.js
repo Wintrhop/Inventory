@@ -26,9 +26,10 @@ function create(req, res, next) {
             if (userAuthId.role === "client") {
                 throw new Error("Clients not allowed to create files");
             }
-            if (userAuthId.role !== "admin" && "support") {
-                console.log(userAuthId.role + ' linea 26 de files controller');
-                (0, Projects_controller_1.userAllowed)(userAuthId.project, projectId);
+            if (userAuthId.role !== "admin") {
+                if (userAuthId.role !== "support") {
+                    (0, Projects_controller_1.userAllowed)(userAuthId.project, projectId);
+                }
             }
             const newFile = Object.assign(Object.assign({}, data), { user: userAuthId._id, project: project._id });
             const fileCreate = yield Files_model_1.default.create(newFile);

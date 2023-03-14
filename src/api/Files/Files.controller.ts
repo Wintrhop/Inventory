@@ -17,14 +17,16 @@ export async function create(
     const { projectId } = req.params;
     const data = req.body;
     const project = await projectExist(projectId as string);
-    
+
     if (userAuthId.role === "client") {
       throw new Error("Clients not allowed to create files");
     }
-    
-    if (userAuthId.role !== "admin" && "support") {
-      console.log(userAuthId.role + ' linea 26 de files controller')
-      userAllowed(userAuthId.project as string, projectId as string);
+
+    if (userAuthId.role !== "admin") {
+      if (userAuthId.role !== "support") {
+        
+        userAllowed(userAuthId.project as string, projectId as string);
+      }
     }
     const newFile = {
       ...data,
