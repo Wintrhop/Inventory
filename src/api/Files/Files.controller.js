@@ -12,8 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.list = exports.create = void 0;
+exports.show = exports.listAll = exports.create = void 0;
 const User_controller_1 = require("../Users/User.controller");
+const Projects_model_1 = __importDefault(require("../Projects/Projects.model"));
 const Files_model_1 = __importDefault(require("../Files/Files.model"));
 const Projects_controller_1 = require("../Projects/Projects.controller");
 function create(req, res, next) {
@@ -22,7 +23,7 @@ function create(req, res, next) {
             const userAuthId = yield (0, User_controller_1.userFinder)(req.userId);
             const { projectId } = req.params;
             const data = req.body;
-            const project = yield (0, Projects_controller_1.projectExist)(projectId);
+            const project = yield (0, Projects_controller_1.elementExist)(projectId, Projects_model_1.default);
             if (userAuthId.role === "client") {
                 throw new Error("Clients not allowed to create files");
             }
@@ -48,11 +49,43 @@ function create(req, res, next) {
     });
 }
 exports.create = create;
-function list(req, res, next) {
+function listAll(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const userAuthId = yield (0, User_controller_1.adminVerification)(req.userId, "adminAndSupport");
+            const files = yield Files_model_1.default.find().populate({
+                path: "user",
+                select: "-_id email",
+            });
+            if (files.length === 0) {
+                throw new Error("Files empty");
+            }
+            res.status(201).json({ message: "Files found", data: files });
         }
-        catch (error) { }
+        catch (err) {
+            res.status(404).json({ message: "Error", error: err.message });
+        }
     });
 }
-exports.list = list;
+exports.listAll = listAll;
+function show(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const userAuthId = yield (0, User_controller_1.userFinder)(req.userId);
+            const { fileId } = req.params;
+            const file = yield (0, Projects_controller_1.elementExist)(fileId, Files_model_1.default);
+            if (!(file === null || file === void 0 ? void 0 : file._id)) {
+                throw new Error("File not found");
+            }
+            if (userAuthId.role !== "admin") {
+                if (userAuthId.role !== "support") {
+                    (0, Projects_controller_1.userAllowed)(userAuthId.files, fileId);
+                }
+            }
+        }
+        catch (err) {
+        }
+    });
+}
+exports.show = show;
+;

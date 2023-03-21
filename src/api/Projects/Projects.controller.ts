@@ -4,16 +4,21 @@ import { transporter, projectCreated } from "../../utils/mailer";
 import { RequestWithUserId } from "../../utils/auth";
 import { adminVerification, userFinder } from "../Users/User.controller";
 import Project, { IProject } from "./Projects.model";
+import { Model, Schema } from "mongoose";
 
-export async function projectExist(projectId: string) {
-  const project = await Project.findById(projectId);
-  if (!project) {
-    throw new Error("Project not Found");
+export async function elementExist(elementId: string, elementModel: any) {
+  const element = await elementModel.findById(elementId);
+  if (!element) {
+    throw new Error(`${elementModel} not found`);
   }
-  return project;
+  return element;
 }
-export function userAllowed(userProject:string, projectId: string) {
-  if(userProject !== projectId) throw new Error("Invalid user");
+export function userAllowed(userElement: any, elementId: string) {
+  if (typeof userElement === "string") {
+    if (userElement !== elementId) throw new Error("Invalid user");
+  } else {
+    if(userElement.includes)
+  }
 }
 export async function create(
   req: RequestWithUserId,
@@ -52,8 +57,7 @@ export async function update(
     const { projectId } = req.params;
     const { users, endDate } = req.body;
     const usersError = new Array();
-    const project = await projectExist(projectId as string);
-    
+    const project = await elementExist(projectId as string, Project);
     if (!!endDate) {
       if (project.endDate !== undefined) {
         throw new Error("project already ended");
@@ -113,7 +117,15 @@ export async function list(
       req.userId as string,
       "adminAndSupport"
     );
-    const projects = await Project.find(); //.select("-users");
+    const projects = await Project.find()
+      .populate({
+        path: "users",
+        select: "-_id email org",
+      })
+      .populate({
+        path: "files",
+        select: "-_id name file",
+      }); //.select("-users");
     if (projects.length === 0) {
       throw new Error("Projects empty");
     }
@@ -130,8 +142,8 @@ export async function show(
   try {
     const userAuthId = await userFinder(req.userId as string);
     const { projectId } = req.params;
-    const project = await projectExist(projectId as string);
 
+    const project = await elementExist(projectId as string, Project);
     if (!project?._id) {
       throw new Error("Project not found");
     }
@@ -140,10 +152,15 @@ export async function show(
         throw new Error("Invalid user");
       }
     }
-    const projectShow = await Project.findById(projectId).populate({
-      path: "users",
-      select: "-_id -password",
-    });
+    const projectShow = await Project.findById(projectId)
+      .populate({
+        path: "users",
+        select: "-_id email org",
+      })
+      .populate({
+        path: "files",
+        select: "-_id name file",
+      });
     res.status(201).json({ message: "Project found", data: projectShow });
   } catch (err: any) {
     res.status(400).json({ message: "error", error: err.message });

@@ -12,24 +12,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.show = exports.list = exports.update = exports.create = exports.userAllowed = exports.projectExist = void 0;
+exports.show = exports.list = exports.update = exports.create = exports.userAllowed = exports.elementExist = void 0;
 const User_model_1 = __importDefault(require("../Users/User.model"));
 const mailer_1 = require("../../utils/mailer");
 const User_controller_1 = require("../Users/User.controller");
 const Projects_model_1 = __importDefault(require("./Projects.model"));
-function projectExist(projectId) {
+function elementExist(elementId, elementModel) {
     return __awaiter(this, void 0, void 0, function* () {
-        const project = yield Projects_model_1.default.findById(projectId);
-        if (!project) {
-            throw new Error("Project not Found");
+        const element = yield elementModel.findById(elementId);
+        if (!element) {
+            throw new Error(`${elementModel} not found`);
         }
-        return project;
+        return element;
     });
 }
-exports.projectExist = projectExist;
-function userAllowed(userProject, projectId) {
-    if (userProject !== projectId)
-        throw new Error("Invalid user");
+exports.elementExist = elementExist;
+function userAllowed(userElement, elementId) {
+    if (typeof userElement === "string") {
+        if (userElement !== elementId)
+            throw new Error("Invalid user");
+    }
+    else {
+        if (userElement.includes)
+            ;
+    }
 }
 exports.userAllowed = userAllowed;
 function create(req, res, next) {
@@ -63,7 +69,7 @@ function update(req, res, next) {
             const { projectId } = req.params;
             const { users, endDate } = req.body;
             const usersError = new Array();
-            const project = yield projectExist(projectId);
+            const project = yield elementExist(projectId, Projects_model_1.default);
             if (!!endDate) {
                 if (project.endDate !== undefined) {
                     throw new Error("project already ended");
@@ -121,7 +127,15 @@ function list(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const userAuthId = yield (0, User_controller_1.adminVerification)(req.userId, "adminAndSupport");
-            const projects = yield Projects_model_1.default.find(); //.select("-users");
+            const projects = yield Projects_model_1.default.find()
+                .populate({
+                path: "users",
+                select: "-_id email org",
+            })
+                .populate({
+                path: "files",
+                select: "-_id name file",
+            }); //.select("-users");
             if (projects.length === 0) {
                 throw new Error("Projects empty");
             }
@@ -138,7 +152,7 @@ function show(req, res, next) {
         try {
             const userAuthId = yield (0, User_controller_1.userFinder)(req.userId);
             const { projectId } = req.params;
-            const project = yield projectExist(projectId);
+            const project = yield elementExist(projectId, Projects_model_1.default);
             if (!(project === null || project === void 0 ? void 0 : project._id)) {
                 throw new Error("Project not found");
             }
@@ -147,9 +161,14 @@ function show(req, res, next) {
                     throw new Error("Invalid user");
                 }
             }
-            const projectShow = yield Projects_model_1.default.findById(projectId).populate({
+            const projectShow = yield Projects_model_1.default.findById(projectId)
+                .populate({
                 path: "users",
-                select: "-_id -password",
+                select: "-_id email org",
+            })
+                .populate({
+                path: "files",
+                select: "-_id name file",
             });
             res.status(201).json({ message: "Project found", data: projectShow });
         }

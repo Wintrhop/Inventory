@@ -5,7 +5,9 @@ import { adminVerification, userFinder } from "../Users/User.controller";
 import Project, { IProject } from "../Projects/Projects.model";
 import User, { IUser } from "../Users/User.model";
 import File, { IFile } from "../Files/Files.model";
-import { projectExist, userAllowed } from "../Projects/Projects.controller";
+import { elementExist, userAllowed } from "../Projects/Projects.controller";
+
+
 
 export async function create(
   req: RequestWithUserId,
@@ -16,7 +18,7 @@ export async function create(
     const userAuthId = await userFinder(req.userId as string);
     const { projectId } = req.params;
     const data = req.body;
-    const project = await projectExist(projectId as string);
+    const project = await elementExist(projectId as string, Project);
 
     if (userAuthId.role === "client") {
       throw new Error("Clients not allowed to create files");
@@ -24,7 +26,6 @@ export async function create(
 
     if (userAuthId.role !== "admin") {
       if (userAuthId.role !== "support") {
-        
         userAllowed(userAuthId.project as string, projectId as string);
       }
     }
@@ -47,11 +48,48 @@ export async function create(
   }
 }
 
-export async function list(
+export async function listAll(
   req: RequestWithUserId,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
-  } catch (error) {}
+    const userAuthId = await adminVerification(
+      req.userId as string,
+      "adminAndSupport"
+    );
+
+    const files = await File.find().populate({
+      path: "user",
+      select: "-_id email",
+    });
+    if (files.length === 0) {
+      throw new Error("Files empty");
+    }
+    res.status(201).json({ message: "Files found", data: files });
+  } catch (err: any) {
+    res.status(404).json({ message: "Error", error: err.message });
+  }
 }
+export async function show(
+  req: RequestWithUserId,
+  res: Response,
+  next: NextFunction
+):Promise<void>{
+  try {
+    const userAuthId = await userFinder(req.userId as string);
+    const { fileId } = req.params;
+    
+    const file = await elementExist(fileId as string, File);
+    if (!file?._id) {
+      throw new Error("File not found");
+    }
+    if (userAuthId.role !== "admin") {
+      if (userAuthId.role !== "support") {
+        userAllowed(userAuthId.files, fileId as string);
+      }
+    }
+  } catch (err) {
+    
+  }
+};
