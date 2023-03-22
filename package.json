@@ -1,7 +1,5 @@
 {
-  "engines": {
-    "node": "18.13.0"
-  },
+  
   "name": "inventory",
   "version": "1.0.0",
   "description": "",
