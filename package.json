@@ -1,6 +1,6 @@
 {
   "engines": {
-    "node": ">=14 <15"
+    "node": "v18.13.0"
   },
   "name": "inventory",
   "version": "1.0.0",
