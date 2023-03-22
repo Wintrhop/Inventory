@@ -17,7 +17,8 @@ export function userAllowed(userElement: any, elementId: string) {
   if (typeof userElement === "string") {
     if (userElement !== elementId) throw new Error("Invalid user");
   } else {
-    if(userElement.includes)
+    if(!userElement.includes(elementId)) throw new Error("Invalid user");
+    ;
   }
 }
 export async function create(

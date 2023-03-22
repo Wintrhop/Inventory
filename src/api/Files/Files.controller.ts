@@ -86,10 +86,22 @@ export async function show(
     }
     if (userAuthId.role !== "admin") {
       if (userAuthId.role !== "support") {
-        userAllowed(userAuthId.files, fileId as string);
+        userAllowed(userAuthId.files, file._id as string);
       }
     }
-  } catch (err) {
+
+    const fileShow =  await file
+    .populate([{
+      path: "user",
+      select: "-_id email org",
+    },
+  {
+    path:"project",
+    select:"-files -users"
+  }])
     
+    res.status(201).json({ message: "File found", data: fileShow });
+  } catch (err: any) {
+    res.status(400).json({ message: "error", error: err.message });
   }
 };

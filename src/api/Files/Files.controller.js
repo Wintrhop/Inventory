@@ -79,11 +79,22 @@ function show(req, res, next) {
             }
             if (userAuthId.role !== "admin") {
                 if (userAuthId.role !== "support") {
-                    (0, Projects_controller_1.userAllowed)(userAuthId.files, fileId);
+                    (0, Projects_controller_1.userAllowed)(userAuthId.files, file._id);
                 }
             }
+            const fileShow = yield file
+                .populate([{
+                    path: "user",
+                    select: "-_id email org",
+                },
+                {
+                    path: "project",
+                    select: "-files -users"
+                }]);
+            res.status(201).json({ message: "File found", data: fileShow });
         }
         catch (err) {
+            res.status(400).json({ message: "error", error: err.message });
         }
     });
 }

@@ -33,8 +33,9 @@ function userAllowed(userElement, elementId) {
             throw new Error("Invalid user");
     }
     else {
-        if (userElement.includes)
-            ;
+        if (!userElement.includes(elementId))
+            throw new Error("Invalid user");
+        ;
     }
 }
 exports.userAllowed = userAllowed;
